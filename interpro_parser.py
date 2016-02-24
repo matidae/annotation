@@ -76,8 +76,6 @@ def printNode(cds_node, matches_list):
             et.SubElement(cds_node, i.matchType, name = i.name) 
         elif i.matchType in ["coils", "tmhmm"]:
             et.SubElement(cds_node, i.matchType, count = i.name) 
-        elif i.matchType in ["coils", "tmhmm","signalp", "phobius"]:
-            pass
         else:
             et.SubElement(cds_node, i.matchType, id = i.idn, desc = i.desc) 
 
