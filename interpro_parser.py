@@ -2,8 +2,14 @@ import sys
 import xml.etree.cElementTree as et
 import xml.dom.minidom
 
-root = et.parse(sys.argv[1]).getroot()
-newroot = et.Element("annotation")
+class Entry():
+    def  __init__(self, matchType, idn=None, name=None, desc=None, evalue=None):
+        self.matchType = matchType
+        self.idn = idn
+        self.name = name
+        self.desc = desc
+        self.evalue = evalue
+
 
 def genericEntry(node, matchType):
     desc = ""
@@ -34,13 +40,6 @@ def basicEntry(node, matchType):
                 name = n.attrib["ac"]
     return Entry(matchType, name=name)
 
-class Entry():
-    def  __init__(self, matchType, idn=None, name=None, desc=None, evalue=None):
-        self.matchType = matchType
-        self.idn = idn
-        self.name = name
-        self.desc = desc
-        self.evalue = evalue
 
 def getTerms(node):
     term_list = []
@@ -78,6 +77,10 @@ def printNode(cds_node, matches_list):
             et.SubElement(cds_node, i.matchType, count = i.name) 
         else:
             et.SubElement(cds_node, i.matchType, id = i.idn, desc = i.desc) 
+
+#starting point
+root = et.parse(sys.argv[1]).getroot()
+newroot = et.Element("annotation")
 
 for node in root:
     protein = node.getchildren()
