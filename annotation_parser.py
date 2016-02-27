@@ -43,17 +43,20 @@ def loadXML(xml):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Filter annotation") 
-    parser.add_argument("-i", dest="filename",
-                        help="XML file")
-    parser.add_argument("-d", dest ="db",
-                        help="Show dbs annotation")
+    parser.add_argument("-in", dest="filename",
+                        help="XML input file")
+    parser.add_argument("-db", dest ="db",
+                        help="Show annotations of selected databases")
     parser.add_argument("-all", action='store_true',
-                        help="Show all annotations")
+                        help="Show annotations from all databases")
+    parser.add_argument("-na", action='store_true',
+                        help="Show also tn names of CDS without annotation")
     return parser.parse_args()
 
 
 def main(cds_all):
-    match_list = parse_args().db.split(",")
+    if parse_args().db:
+        match_list = parse_args().db.split(",")
     dbs =["fingerprints", "hmmer3", "hmmer2", "panther", "superfamilyhmmer3","profilescan", "patternscan","signalp", "phobius","coils", "tmhmm","blastprodom","goMF", "goCC", "goBP"]
     for cds in cds_all:
         name = cds.name
@@ -71,8 +74,11 @@ def main(cds_all):
                     line += entry.matchType + "=" +entry.idn + ":" + entry.desc.replace(" ","_") + "; "
         else:
             parse.print_help()
+        na = parse_args().na
         if line:
             print name, line
+        elif na:
+            print name, "NA"
 
 if __name__ == "__main__":
     cds_all = []
