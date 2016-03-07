@@ -91,16 +91,16 @@ def main(cds_all, dbs_sel):
         line = ""
         for entry in cds.matches:
             if entry.matchType in dbs_sel:
-                if entry.matchType in ["hmmer2", "hmmer3", "patternscan"]:
+                if entry.matchType in ["fingerprints", "hmmer3", "hmmer2", "panther", "superfamilyhmmer3", "blastprodom"]:
+                    line += entry.matchType + ":" + entry.idn + ":" + entry.desc.replace(" ","_") + ":" + entry.evalue + "; "
+                elif entry.matchType in ["profilescan", "patternscan", "goMF", "goBP", "goCC","kegg", "unipathway", "reactome", "metacyc"]:
                     line += entry.matchType + ":" + entry.idn + ":" + entry.desc.replace(" ","_") + "; "
-                elif entry.matchType in ["blast_hit"]:
-                    line += entry.matchType + ":" + entry.desc.replace(" ","_") + ":" + entry.evalue + ":" + entry.sp.replace(" ","_") + "; "
                 elif entry.matchType[:-2] == "blast_hit":
                     line += entry.matchType + ":" + entry.desc.replace(" ","_") + ":" + entry.evalue + ":" + entry.sp.replace(" ","_") + "; "
                 elif entry.matchType in ["coils", "tmhmm"]:
                     line += entry.matchType + ":" + entry.count + "; "
-                else:
-                    line += entry.matchType + ":" + entry.idn + "; "
+                elif entry.matchType in ["signalp", "phobius"]:
+                    line += entry.matchType + ":" + entry.name.replace(" ","_") + "; "
         na = parse_args().na
         if line:
             print name, line
