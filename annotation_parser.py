@@ -55,44 +55,52 @@ def parse_args():
     parser.add_argument("-in", dest="filename",
                         help="XML input file")
     parser.add_argument("-db", dest ="db",
-                        help="Show annotations of selected databases")
+                        help="Show annotations of selected databases. Possible dbs: fingerprints, hmmer3, hmmer2, panther, superfamilyhmmer3, profilescan, patternscan, signalp, phobius, tmhmm, blastprodom, goMF, goCC, goBP, kegg, unipathway, reactome, metacyc, coils, blast_hit_(0-3)")
     parser.add_argument("-all", action='store_true',
                         help="Show annotations from all databases")
     parser.add_argument("-na", action='store_true',
                         help="Show also tn names of CDS without annotation")
     return parser.parse_args()
 
-
-def main(cds_all):
-    if parse_args().db:
-        match_list = parse_args().db.split(",")
-    dbs = ["fingerprints", "hmmer3", "hmmer2", "panther", "superfamilyhmmer3","profilescan", "patternscan","signalp", "phobius", "tmhmm","blastprodom","goMF", "goCC", "goBP", "kegg", "unipathway", "reactome", "metacyc", "coils"]
+def check_args():
+    dbs = ["fingerprints", "hmmer3", "hmmer2", "panther", "superfamilyhmmer3","profilescan", "patternscan","signalp", "phobius", "tmhmm","blastprodom","goMF", "goCC", "goBP", "kegg", "unipathway", "reactome", "metacyc", "coils", "blast_hit_0", "blast_hit_1", "blast_hit_2", "blast_hit_3"]
+    if parse_args().all:
+        return dbs
+    elif parse_args().db:
+        match_list = []
+        for i in parse_args().db.split(","):
+            if "blast_hit" in parse_args().db:
+                match_list+=["blast_hit_0", "blast_hit_1", "blast_hit_2", "blast_hit_3"]
+            else:
+                if i in dbs:
+                    match_list.append(i)
+                else:
+                    print "Wrong database: " + i
+                    show_dbs = dbs[:-4]
+                    show_dbs.append("blast_hit")
+                    print "Databases are: \n" + ", ".join(show_dbs)
+                    sys.exit()
+        return match_list 
+    else:
+        parse.print_help()
+        
+def main(cds_all, dbs_sel):
+    dbs = ["fingerprints", "hmmer3", "hmmer2", "panther", "superfamilyhmmer3","profilescan", "patternscan","signalp", "phobius", "tmhmm","blastprodom","goMF", "goCC", "goBP", "kegg", "unipathway", "reactome", "metacyc", "coils", "blast_hit"]
     for cds in cds_all:
         name = cds.name
         line = ""
-        if parse_args().all:
-            for entry in cds.matches:
-                if entry.matchType in dbs:
-                    if entry.desc:
-                        line += entry.matchType + ":" + entry.idn + ":" + entry.desc.replace(" ","_") + "; "
-                    elif entry.evalue:
-                        line += entry.matchType + ":" + entry.desc.replace(" ","_") + ":" + entry.evalue + ":" + entry.sp.replace(" ","_") + "; "
-                    elif entry.count:
-                        line += entry.matchType + ":" + entry.count + "; "
-                    else:
-                        line += entry.matchType + ":" + entry.idn + "; "
-                elif "blast_hit" in entry.matchType:
+        for entry in cds.matches:
+            if entry.matchType in dbs_sel:
+                if entry.matchType in ["hmmer2", "hmmer3", "patternscan"]:
+                    line += entry.matchType + ":" + entry.idn + ":" + entry.desc.replace(" ","_") + "; "
+                elif entry.matchType in ["blast_hit"]:
                     line += entry.matchType + ":" + entry.desc.replace(" ","_") + ":" + entry.evalue + ":" + entry.sp.replace(" ","_") + "; "
-        elif len(match_list) > 0:
-            for i in match_list:
-                if i not in dbs:
-                    print "Wrong db: " + i
-                    sys.exit()
-            for entry in cds.matches:
-                if entry.matchType in match_list:
-                    line += entry.matchType + "=" +entry.idn + ":" + entry.desc.replace(" ","_") + "; "
-        else:
-            parse.print_help()
+                elif entry.matchType[:-2] == "blast_hit":
+                    line += entry.matchType + ":" + entry.desc.replace(" ","_") + ":" + entry.evalue + ":" + entry.sp.replace(" ","_") + "; "
+                elif entry.matchType in ["coils", "tmhmm"]:
+                    line += entry.matchType + ":" + entry.count + "; "
+                else:
+                    line += entry.matchType + ":" + entry.idn + "; "
         na = parse_args().na
         if line:
             print name, line
@@ -103,5 +111,6 @@ if __name__ == "__main__":
     cds_all = []
     with open(parse_args().filename) as xml:
         cds_all = loadXML(xml)
-    main(cds_all)
+    dbs_sel = check_args()
+    main(cds_all, dbs_sel)
             
