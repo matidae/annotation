@@ -38,7 +38,7 @@ def loadXML(xml):
             elif sub.tag in ["profilescan", "patternscan"]:
                 entry = Entry(matchType=sub.tag, idn=sub.attrib["id"], desc=sub.attrib["desc"])
             elif sub.tag in  ["signalp", "phobius"]:
-                entry = Entry(matchType=sub.tag, idn=sub.attrib["name"])
+                entry = Entry(matchType=sub.tag, name=sub.attrib["name"])
             elif sub.tag in ["coils", "tmhmm"]:
                 entry = Entry(matchType=sub.tag, count=sub.attrib["count"])
             elif sub.tag == "blastprodom":
